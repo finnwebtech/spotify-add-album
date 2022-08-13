@@ -1,0 +1,19 @@
+{
+  "name": "spotify-add-album",
+  "version": "1.0.0",
+  "description": "Adds the newest best albums form sputnikmusic to a spotify account",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/finnwebtech/spotify-add-album.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/finnwebtech/spotify-add-album/issues"
+  },
+  "homepage": "https://github.com/finnwebtech/spotify-add-album#readme"
+}
