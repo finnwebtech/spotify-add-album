@@ -7,7 +7,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint src",
-    "build": "tsc"
+    "build": "tsc",
+    "netlify": "netlify"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
   },
   "dependencies": {
     "dotenv": "^16.0.1",
+    "netlify-cli": "^11.3.0",
     "node-fetch": "^3.2.10",
     "node-html-parser": "^5.4.2-0",
     "playwright": "^1.25.0"

@@ -1,0 +1,5 @@
+
+
+[[edge_functions]]
+function = "add_albums_to_spotify"
+path = "/test"
