@@ -1,4 +1,5 @@
 export default {
+    MODE: process.env.production ? "production" : "development",
     CLIENT_ID: process.env.CLIENT_ID as string,
     CLIENT_SECRET: process.env.CLIENT_SECRET as string,
     SPOTIFY_AUTH_URL: process.env.SPOTIFY_AUTH_URL as string,
