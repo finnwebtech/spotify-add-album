@@ -1,5 +1,7 @@
+[build]
+	command = "# no build command"
+	functions = "netlify/functions"
+	publish = "public"
 
-
-[[edge_functions]]
-function = "add_albums_to_spotify"
-path = "/test"
+[functions]
+        node_bundler = "esbuild"
