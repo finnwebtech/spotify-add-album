@@ -1,9 +1,7 @@
 import { default as CONSTANTS } from "./constants.js";
 import fetch from "node-fetch";
-import playwright from "playwright-core";
-import chromium from "chrome-aws-lambda";
+import playwright from "playwright-aws-lambda";
 import { URLSearchParams } from "url";
-
 interface AccessTokenResponse {
     access_token: string;
     token_type: string;
@@ -62,10 +60,8 @@ export async function login(user: string, pw: string) {
  * @param pw password
  */
 export async function getAuthorizationCode(user: string, pw: string): Promise<AuthorizationCodeResponse> {
-    const browser = await playwright.chromium.launch({
-        args: chromium.args,
-        executablePath: await chromium.executablePath,
-        headless: chromium.headless
+    const browser = await playwright.launchChromium({
+        headless: CONSTANTS.MODE === "production" ? true : false
     });
     const context = await browser.newContext({
         locale: "de"
