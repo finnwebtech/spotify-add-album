@@ -1,4 +1,3 @@
-import type { Websites } from "./typings/website-helper.js";
 import { HTMLElement, parse } from "node-html-parser";
 import fetch from 'node-fetch';
 import CONSTANTS from "./constants.js";
@@ -8,7 +7,7 @@ import CONSTANTS from "./constants.js";
  * @param urls collection of websites
  * @returns collection of albums with artist and name
  */
-export async function getAlbumsFromWebiste(types: Websites[]): Promise<string[]> {
+export async function getAlbumsFromWebiste(types: string[]): Promise<string[]> {
     var result: string[] = [];
     for (let type of types) {
         switch (type) {
