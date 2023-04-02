@@ -7,7 +7,7 @@ Adds the newest best albums from a website to spotify
 
 ## Usage
 
-Create a .env file
+1. Create a .env file at the top level
 
 ```env
 CLIENT_ID=<spotify API>
@@ -17,15 +17,16 @@ SPOTIFY_MAIL=<mail from spotify account>
 SPOTIFY_PW=<pw from spotify account>
 ```
 
+2. Use it:
 ```typescript
 
 import 'dotenv/config';
 import { Websites } from "./typings/website-helper.js";
 import { default as CONSTANTS } from "./constants.js";
-import { getAlbums } from "./website-helper.js";
+import { getAlbumsFromWebsite } from "./website-helper.js";
 import { addAlbumsToSpotify, login } from "./spotify-helper.js";
 
-const albumNames = await getAlbums([
+const albumNames = await getAlbumsFromWebsite([
     Websites.metacritic,
     Websites.sputnikmusic
 ]);
