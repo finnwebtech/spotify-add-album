@@ -1,8 +1,8 @@
 {
   "name": "spotify-add-album",
   "version": "1.0.0",
-  "description": "Adds the newest best albums form sputnikmusic.com to a spotify account",
-  "main": "src/index.js",
+  "description": "Adds the newest best albums a website to spotify",
+  "main": "build/index.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

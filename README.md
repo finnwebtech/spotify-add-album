@@ -21,14 +21,13 @@ SPOTIFY_PW=<pw from spotify account>
 ```typescript
 
 import 'dotenv/config';
-import { Websites } from "./typings/website-helper.js";
 import { default as CONSTANTS } from "./constants.js";
 import { getAlbumsFromWebsite } from "./website-helper.js";
 import { addAlbumsToSpotify } from "./spotify-helper.js";
 
 const albumNames = await getAlbumsFromWebsite([
-    Websites.metacritic,
-    Websites.sputnikmusic
+    "metacritic",
+    "sputnikmusic"
 ]);
 const result = await addAlbumsToSpotify(
     albumNames,
