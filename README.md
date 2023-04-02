@@ -24,7 +24,7 @@ import 'dotenv/config';
 import { Websites } from "./typings/website-helper.js";
 import { default as CONSTANTS } from "./constants.js";
 import { getAlbumsFromWebsite } from "./website-helper.js";
-import { addAlbumsToSpotify, login } from "./spotify-helper.js";
+import { addAlbumsToSpotify } from "./spotify-helper.js";
 
 const albumNames = await getAlbumsFromWebsite([
     Websites.metacritic,
