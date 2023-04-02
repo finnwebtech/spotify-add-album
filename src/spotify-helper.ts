@@ -1,47 +1,15 @@
+import type {
+    AuthorizationCodeResponse,
+    ISearchAlbumResponse,
+    ISearchAlbumResponseItem,
+    ISpotifyQuery,
+    ISpotifyLogin
+} from "./typings/spotify-helper.js";
 import { default as CONSTANTS } from "./constants.js";
 import fetch from "node-fetch";
 import playwright from "playwright";
 import { URLSearchParams } from "url";
-interface AccessTokenResponse {
-    access_token: string;
-    token_type: string;
-    expires_in: number;
-}
-
-interface AuthorizationCodeResponse {
-    code: string;
-    state: string;
-}
-
-interface ISearchAlbumResponseItem {
-    album_type: string;
-    artists: Array<any>;
-    available_markets: Array<any>;
-    external_urls: object;
-    href: string;
-    id: string;
-    images: Array<any>;
-    name: string;
-    release_date: string;
-    release_date_precision: string;
-    total_tracks: number;
-    type: string;
-    uri: string;
-}
-
-interface ISearchAlbumResponse {
-    href: string;
-    items: Array<ISearchAlbumResponseItem>;
-    limit: number;
-    next: string;
-    offset: number;
-    previous: number | null;
-    total: number;
-}
-
-interface ISpotifyQuery {
-    token: string;
-}
+import { readFileSync, writeFileSync, existsSync, readFile } from "fs";
 
 /**
  * Login and get the access token for the API calls
@@ -59,7 +27,7 @@ export async function login(user: string, pw: string) {
  * @param user username
  * @param pw password
  */
-export async function getAuthorizationCode(user: string, pw: string): Promise<AuthorizationCodeResponse> {
+async function getAuthorizationCode(user: string, pw: string): Promise<AuthorizationCodeResponse> {
     const browser = await playwright.chromium.launch({
         headless: CONSTANTS.MODE === "production" ? true : false
     });
@@ -82,7 +50,7 @@ export async function getAuthorizationCode(user: string, pw: string): Promise<Au
 
     const [request] = await Promise.all([
         page.waitForRequest(url => url.url().includes(CONSTANTS.SPOTIFY_REDIRECT_URL)),
-        page.locator('text=Anmelden').click(),
+        page.locator('button#login-button').click(),
         //page.locator('text=ICH STIMME ZU').click({ timeout: 10000 })
     ]);
 
@@ -125,7 +93,7 @@ function generateRandomString(length: number): string {
  * @param authorization_code spotifys authorization code for the user
  * @returns Access Token
  */
-export async function getAccessToken(client_id: string, client_secret: string, authorization_code: string): Promise<string> {
+async function getAccessToken(client_id: string, client_secret: string, authorization_code: string): Promise<string> {
     const response = await postData(CONSTANTS.SPOTIFY_TOKEN_URL, {
         headers: {
             'Authorization': 'Basic ' + (Buffer.from(client_id + ':' + client_secret).toString('base64')),
@@ -166,7 +134,7 @@ export async function searchAlbum(name: string, config: ISpotifyQuery): Promise<
  * @param name name of the album
  * @returns 
  */
-export async function addAlbums(token: string, ids: Array<string>): Promise<string> {
+async function addAlbums(token: string, ids: Array<string>): Promise<string> {
     const response = await fetch(CONSTANTS.SPOTIFY_SAFE_ALBUM_URL, {
         method: "PUT",
         headers: {
@@ -182,17 +150,29 @@ export async function addAlbums(token: string, ids: Array<string>): Promise<stri
 
 /**
  * Add Albums to spotify libary
- * @param albumNames collection of artist wit album name
- * @param config configuration for the spotify api
+ * @param albumNames collection of artist with album name
+ * @param config spotify login
  */
-export async function addAlbumsToSpotify(albumNames: string[], config: ISpotifyQuery) {
-    for (var albumName of albumNames) {
-        const album = await searchAlbum(albumName, { token: config.token });
-        if (album.items.length > 0) {
-            const result = await addAlbums(config.token, [album.items[0].id]);
+export async function addAlbumsToSpotify(albumNames: string[], config: ISpotifyLogin): Promise<string[]> {
+    const token = await login(config.user, config.pw);
+    const information = [];
+    for (let albumName of albumNames) {
+        const album = await searchAlbum(albumName, { token: token });
+        const albumId = album.items[0]?.id;
+        if (albumId && !hasAdded(albumId)) {
+            const result = await addAlbums(token, [albumId]);
             console.log(albumName + " > " + result);
+            if (result === "OK") {
+                addId(albumId);
+                information.push(albumName + " > " + result);
+            } else {
+                throw Error(
+                    albumName + " > " + result
+                );
+            }
         }
     }
+    return information;
 }
 
 /**
@@ -201,7 +181,7 @@ export async function addAlbumsToSpotify(albumNames: string[], config: ISpotifyQ
  * @param data 
  * @returns 
  */
-export async function postData(url = '', data: any): Promise<any> {
+async function postData(url = '', data: any): Promise<any> {
     const response = await fetch(url, {
         method: "POST",
         headers: data.headers,
@@ -214,12 +194,11 @@ export async function postData(url = '', data: any): Promise<any> {
 }
 
 /**
- * 
  * @param url 
  * @param data 
  * @returns 
  */
-export async function getData(url = '', data: any): Promise<any> {
+async function getData(url = '', data: any): Promise<any> {
     const response = await fetch(url + new URLSearchParams(data.searchParams), {
         method: "GET",
         headers: data.headers
@@ -228,4 +207,43 @@ export async function getData(url = '', data: any): Promise<any> {
         throw Error(response.status + ": " + response.statusText);
     }
     return response.json();
+}
+
+/**
+ * @param id
+ */
+function hasAdded(id: string): boolean {
+    return getAddedIds("./database.txt").includes(id);
+}
+
+/**
+ * @param id
+ */
+function addId(id: string): void {
+    console.log("Add id '" + id + "' to the database");
+    const addedIds = getAddedIds("./database.txt");
+    addedIds.push(
+        id
+    );
+    writeFileSync(
+        "./database.txt",
+        [...new Set(addedIds)].join("\r\n")
+    );
+}
+
+/**
+ * @param filePath
+ */
+function getAddedIds(filePath: string): Array<string> {
+    let data: Array<string> = [];
+    if (existsSync(filePath)) {
+        var file = readFileSync(
+            filePath
+        );
+        data = file
+            .toString()
+            .split(/\r?\n/)
+            .filter(e => !!e);
+    }
+    return data;
 }
