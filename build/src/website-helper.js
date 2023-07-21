@@ -1,14 +1,13 @@
-import { HTMLElement, parse } from "node-html-parser";
+import { parse } from "node-html-parser";
 import fetch from 'node-fetch';
 import CONSTANTS from "./constants.js";
-
 /**
  * Get all the album names from a website
  * @param urls collection of websites
  * @returns collection of albums with artist and name
  */
-export async function getAlbumsFromWebsite(types: string[]): Promise<string[]> {
-    var result: string[] = [];
+export async function getAlbumsFromWebsite(types) {
+    var result = [];
     for (let type of types) {
         switch (type) {
             case "sputnikmusic":
@@ -23,11 +22,10 @@ export async function getAlbumsFromWebsite(types: string[]): Promise<string[]> {
     }
     return result;
 }
-
 /**
  * Get album names with artist from sputnikmusic
  */
-async function getAlbumsFromSputnikmusic(): Promise<string[]> {
+async function getAlbumsFromSputnikmusic() {
     const website = await getWebsite(CONSTANTS.SPUTNIKMUSIC_URL);
     const links = getLinks(website, /^\/album\/.*/);
     const albumNames = extractAlbumName(links, /^\/album\/[0-9]+\/(.*)/);
@@ -35,11 +33,10 @@ async function getAlbumsFromSputnikmusic(): Promise<string[]> {
     console.log(albumNames);
     return albumNames;
 }
-
 /**
  * Get album names with artist from metacritic
  */
-async function getAlbumsFromMetacritic(): Promise<string[]> {
+async function getAlbumsFromMetacritic() {
     const website = await getWebsite(CONSTANTS.METACRITIC_URL);
     const links = getLinks(website, /^\/music\/.*\/critic-reviews/);
     const albumNames = extractAlbumName(links, /^\/music\/(.*)\/critic-reviews/);
@@ -47,45 +44,41 @@ async function getAlbumsFromMetacritic(): Promise<string[]> {
     console.log(albumNames);
     return albumNames;
 }
-
 /**
  * Gets a website
  * @param url url of the website
  */
-export async function getWebsite(url: string): Promise<HTMLElement> {
+export async function getWebsite(url) {
     const websiteContent = await getWebsiteAsString(url);
     return await parse(websiteContent);
 }
-
 /**
  * Fetch the website as string
  * @param url url of the webiste
  */
-async function getWebsiteAsString(url: string): Promise<string> {
+async function getWebsiteAsString(url) {
     const response = await fetch(url);
     return response.text();
 }
-
 /**
  * Get all links from a website
  * @param website website from where to get all the links
  * @param includes link includes some words
- * @returns 
+ * @returns
  */
-export function getLinks(website: HTMLElement, regex: RegExp): Array<string> {
+export function getLinks(website, regex) {
     const links = website.getElementsByTagName("a")
         .map(link => link.getAttribute("href"))
-        .filter(link => link && regex.test(link)) as string[];
+        .filter(link => link && regex.test(link));
     return [...new Set(links)];
 }
-
 /**
  * Extracts the name of the artist and album from a link
  * @param links collection of links
  * @param regex regex matches the part of the string
- * @returns 
+ * @returns
  */
-export function extractAlbumName(links: Array<string>, regex: RegExp): Array<string> {
+export function extractAlbumName(links, regex) {
     const result = links
         .map(link => decodeURIComponent(link))
         .map(link => link.match(regex))
